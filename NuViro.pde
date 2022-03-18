@@ -1,18 +1,36 @@
+import java.util.HashMap;
+
 Pop[] pops;
+Pop selected;
+Pathogen tester;
+float delta_time=0;
+float last_frame_time=0;
+float update_timer_second=0;
 
 void setup() {
   size (1000, 1000);
   pops = new Pop[100];
   for (int i=0; i<pops.length; i++) pops[i] = new Pop(i);
+  float[] poot = {0.995, 0.999, 0.998, 0.996};
+  tester = new Pathogen(0, "Tester", 4, poot);
 }
 
 void draw() {
   background(0);
-  
-  get_pop_near_mouse(mouseX, mouseY).draw_selected();
+  delta_time = millis()-last_frame_time;
+  last_frame_time = millis();
+  update_timer_second+=delta_time;
+
+  if (update_timer_second>1000) tester.process_infections();
+
+  selected = get_pop_near_mouse(mouseX, mouseY);
+  selected.draw_selected();
   stroke(255); 
   fill(255);
   for (Pop p : pops) p.draw();
+  tester.draw();
+  
+  if (update_timer_second>1000) update_timer_second-=1000;
 }
 
 Pop get_pop_near_mouse(float mousex, float mousey) {
@@ -27,4 +45,8 @@ Pop get_pop_near_mouse(float mousex, float mousey) {
     }
   }
   return pops[pop_index];
+}
+
+void keyReleased() {
+  if (key==' ') tester.infect(selected);
 }
