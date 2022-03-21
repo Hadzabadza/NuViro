@@ -6,13 +6,17 @@ Pathogen tester;
 float delta_time=0;
 float last_frame_time=0;
 float update_timer_second=0;
+float update_period = 20;
 
 void setup() {
   size (1000, 1000);
   pops = new Pop[100];
   for (int i=0; i<pops.length; i++) pops[i] = new Pop(i);
-  float[] poot = {0.995, 0.999, 0.998, 0.996};
-  tester = new Pathogen(0, "Tester", 4, poot);
+  float[] tester_life_cycle_probs = {0.007, 0.006, 0.004, 0.007};
+  int[] tester_repro_brackets = {2, 3};
+  float[] tester_repro_probs = {0.005, 0.002};
+  int[] tester_repro_destinations = {0, 0};
+  tester = new Pathogen(3, "Tester", 4, tester_life_cycle_probs, tester_repro_brackets, tester_repro_probs, tester_repro_destinations);
 }
 
 void draw() {
@@ -21,7 +25,7 @@ void draw() {
   last_frame_time = millis();
   update_timer_second+=delta_time;
 
-  if (update_timer_second>1000) tester.process_infections();
+  if (update_timer_second>update_period) tester.process_infections();
 
   selected = get_pop_near_mouse(mouseX, mouseY);
   selected.draw_selected();
@@ -30,7 +34,7 @@ void draw() {
   for (Pop p : pops) p.draw();
   tester.draw();
   
-  if (update_timer_second>1000) update_timer_second-=1000;
+  if (update_timer_second>update_period) update_timer_second-=update_period;
 }
 
 Pop get_pop_near_mouse(float mousex, float mousey) {
