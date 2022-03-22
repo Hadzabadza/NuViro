@@ -14,9 +14,11 @@ class Pathogen {
   float[] repro_probs;
   int[] repro_destinations;
   
-  ArrayList<Infection> infections;
-  HashMap<Organ, Float> tropism;
-  HashMap<Organ, Float> trophism;
+  LinkedHashMap<organ_type, Float> tropism;
+  LinkedHashMap<organ_type, Float> trophism;
+  
+  
+  LinkedHashMap<Pop, Infection> infections;
 
   Pathogen(
     int _type, 
@@ -34,7 +36,7 @@ class Pathogen {
     repro_brackets = _repro_brackets;
     repro_probs = _repro_probs;
     repro_destinations = _repro_destinations; 
-    infections = new ArrayList<Infection>();
+    infections = new LinkedHashMap<Pop, Infection>();
   }
 
   //Pathogen(
@@ -42,8 +44,8 @@ class Pathogen {
   //  String _name, 
   //  int _life_cycle_states, 
   //  float [] _life_cycle_probs, 
-  //  HashMap<Organ, Float> _tropism, 
-  //  HashMap<Organ, Float> _trophism) 
+  //  LinkedHashMap<organ_type, Float> _tropism, 
+  //  LinkedHashMap<organ_type, Float> _trophism) 
   //{
   //  type = _type;
   //  name = _name;
@@ -54,20 +56,16 @@ class Pathogen {
   //  trophism = _trophism;
   //}
   
-  void infect(Pop target){
-    float infection_strength = 0.05;
-    Organ o = target.organs[round(random(-0.49,organ_type.values().length))];
-    float infection_volume = o.current_volume*infection_strength;
-    Infection i = new Infection(this, o, 0, infection_volume);
-    infections.add(i);
-    target.infections.add(i);
-    o.occupy_volume(infection_volume);
+  void infect(Organ target, int target_bracket, float quantity){
+    Infection i = target.body.infect_with_pathogen(this, target, target_bracket, quantity);
+    infections.put(target.body,i);
+    target.body.infections.put(this, i);
   }
 
   void process_infections() {
-    for (Infection i : infections) i.update();
+    for (Infection inf : infections.values()) inf.update();
   }
   void draw(){
-    for (Infection i : selected.infections) i.draw(50,50);
+    //for (Infection i : selected.infections.values()) i.draw(50,50);
   }
 }

@@ -1,4 +1,4 @@
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 Pop[] pops;
 Pop selected;
@@ -7,6 +7,7 @@ float delta_time=0;
 float last_frame_time=0;
 float update_timer_second=0;
 float update_period = 20;
+float debug_mortality_modifier=1;
 
 void setup() {
   size (1000, 1000);
@@ -33,7 +34,7 @@ void draw() {
   fill(255);
   for (Pop p : pops) p.draw();
   tester.draw();
-  
+
   if (update_timer_second>update_period) update_timer_second-=update_period;
 }
 
@@ -51,6 +52,20 @@ Pop get_pop_near_mouse(float mousex, float mousey) {
   return pops[pop_index];
 }
 
+void keyPressed() {
+  if (key=='m'||key=='M') {
+    debug_mortality_modifier = 10;
+  }
+}
+
 void keyReleased() {
-  if (key==' ') tester.infect(selected);
+  if (key=='m'||key=='M') {
+    debug_mortality_modifier = 1;
+  }
+  if (key==' ') {
+    float infection_strength = 0.05;
+    Organ o = selected.organs[round(random(-0.49, organ_type.values().length-0.51))];
+    float infection_volume = o.current_volume*infection_strength;
+    tester.infect(o, 0, infection_volume);
+  }
 }

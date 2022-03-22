@@ -1,17 +1,17 @@
 public enum organ_type {
 
   TISSUE("Tissue", 200, 2000), 
-  BLOOD("Blood vessels", 100, 1200), 
-  LYMPH("Lymphatic system", 100, 800), 
-  NEURAL("Neural system", 100, 800), 
-  BRAIN("Brain", 200, 400), 
-  EYES("Eyes", 100, 100), 
-  EARS("Ears", 100, 100), 
-  TONGUE("Tongue", 100, 100), 
-  LUNGS("Lungs", 100, 500), 
-  HEART("Heart", 100, 300), 
-  STOMACH("Stomach", 100, 400), 
-  LIVER("Liver", 100, 350);
+    BLOOD("Blood vessels", 100, 1200), 
+    LYMPH("Lymphatic system", 100, 800), 
+    NEURAL("Neural system", 100, 800), 
+    BRAIN("Brain", 200, 400), 
+    EYES("Eyes", 100, 100), 
+    EARS("Ears", 100, 100), 
+    TONGUE("Tongue", 100, 100), 
+    LUNGS("Lungs", 100, 500), 
+    HEART("Heart", 100, 300), 
+    STOMACH("Stomach", 100, 400), 
+    LIVER("Liver", 100, 350);
 
   final float health;
   final float volume;
@@ -32,7 +32,9 @@ class Organ {
   float current_volume;
   float occupied_volume;
   int type;
-  String name;
+  String name; 
+
+  float _adjuster;
 
   Organ(organ_type type, Pop _body) {
     max_health = type.health;
@@ -42,10 +44,13 @@ class Organ {
     name = type.friendly_name;
     body = _body;
   }
-  
-  void occupy_volume(float _volume){
-    if (_volume>current_volume) current_volume = 0;
-    occupied_volume+=_volume;
+
+  float adjust_occupied_volume(float _volume) {
+    _adjuster = min(max_volume-current_volume+_volume, min(current_volume, _volume));
+    //_adjuster = _volume;
+    occupied_volume+=_adjuster;
+    current_volume-=_adjuster;
+    return _adjuster;
   }
 
   void adjust_health(float _health) {

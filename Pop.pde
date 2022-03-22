@@ -2,20 +2,29 @@ class Pop {
   int id;
   PVector pos;
   PVector scale;
+  color c;
   Organ[] organs;
-  ArrayList<Infection> infections;
+  LinkedHashMap<Pathogen, Infection> infections;
 
   Pop(int _id) {
     id = _id;
     pos = new PVector (random(0, width), random(0, height));
     scale = new PVector (10, 10);
     init_organs();
-    infections = new ArrayList<Infection>();
+    infections = new LinkedHashMap<Pathogen, Infection>();
+    c = color(255);
   }
 
   private void init_organs() {
     organs = new Organ[organ_type.values().length];
     for (int i = 0; i<organs.length; i++) organs[i] = new Organ(organ_type.values()[i], this);
+  }
+
+  Infection infect_with_pathogen(Pathogen blueprint, Organ target, int target_bracket, float quantity) {
+    c = color(255,0,0);
+    if (!infections.containsKey(blueprint)) infections.put(blueprint, new Infection(blueprint, target, target_bracket, quantity));
+    else infections.get(blueprint).infect_organ(target, target_bracket, quantity);
+    return infections.get(blueprint);
   }
 
   void update() {
@@ -24,6 +33,7 @@ class Pop {
 
   void draw() {
     update(); 
+    fill(c);
     ellipse(pos.x, pos.y, scale.x, scale.y);
   }
 
@@ -31,6 +41,8 @@ class Pop {
     stroke(0, 255, 0); 
     noFill(); 
     ellipse(pos.x, pos.y, scale.x*2, scale.y*2);
+    fill(255);
+    for (Infection inf : infections.values()) inf.draw(round(pos.x)+10,round(pos.y));
   }
 
   void wander() {
