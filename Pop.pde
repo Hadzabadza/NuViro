@@ -3,8 +3,8 @@ class Pop {
   PVector pos;
   PVector scale;
   color c;
-  Organ[] organs;
-  LinkedHashMap<Pathogen, Infection> infections;
+  HashMap<organ_type, Organ> organs;
+  HashMap<Pathogen, Infection> infections;
 
   Pop(int _id) {
     id = _id;
@@ -16,17 +16,28 @@ class Pop {
   }
 
   private void init_organs() {
-    organs = new Organ[organ_type.values().length];
-    for (int i = 0; i<organs.length; i++) organs[i] = new Organ(organ_type.values()[i], this);
+    organs = new HashMap <organ_type, Organ>();
+    for (int i = 0; i<organ_type.values().length; i++) organs.put(organ_type.values()[i], new Organ(organ_type.values()[i], this));
+    for (Organ o:organs.values()) o.connect_organs(organs);
   }
 
   Infection infect_with_pathogen(Pathogen blueprint, Organ target, int target_bracket, float quantity) {
-    c = color(255,0,0);
+    c = color(255, 0, 0);
     if (!infections.containsKey(blueprint)) infections.put(blueprint, new Infection(blueprint, target, target_bracket, quantity));
     else infections.get(blueprint).infect_organ(target, target_bracket, quantity);
     return infections.get(blueprint);
   }
-
+  
+  Organ get_random_organ(){
+    int target=round(random(-0.49, organs.size()-0.51));
+    int i=0;
+    for (Organ o:organs.values()) {
+      if (i==target) return o;
+      else i++;
+    }
+    return null;
+  }
+  
   void update() {
     wander();
   }
@@ -42,7 +53,7 @@ class Pop {
     noFill(); 
     ellipse(pos.x, pos.y, scale.x*2, scale.y*2);
     fill(255);
-    for (Infection inf : infections.values()) inf.draw(round(pos.x)+10,round(pos.y));
+    for (Infection inf : infections.values()) inf.draw(round(pos.x)+10, round(pos.y));
   }
 
   void wander() {

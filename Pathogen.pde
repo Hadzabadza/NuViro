@@ -14,8 +14,8 @@ class Pathogen {
   float[] repro_probs;
   int[] repro_destinations;
   
-  LinkedHashMap<organ_type, Float> tropism;
-  LinkedHashMap<organ_type, Float> trophism;
+  HashMap<organ_type, Float> tropism;
+  HashMap<organ_type, Float> trophism;
   
   
   LinkedHashMap<Pop, Infection> infections;
@@ -44,8 +44,8 @@ class Pathogen {
   //  String _name, 
   //  int _life_cycle_states, 
   //  float [] _life_cycle_probs, 
-  //  LinkedHashMap<organ_type, Float> _tropism, 
-  //  LinkedHashMap<organ_type, Float> _trophism) 
+  //  HashMap<organ_type, Float> _tropism, 
+  //  HashMap<organ_type, Float> _trophism) 
   //{
   //  type = _type;
   //  name = _name;

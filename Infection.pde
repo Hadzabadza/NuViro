@@ -1,12 +1,10 @@
 class Infection {
   Pathogen pathogen; 
   Pop host;
-  LinkedHashMap<Organ, LocalInfection> local_infections;
-
-  //SortedMap<Organ, float[]> pathogen_pool;
+  HashMap<Organ, LocalInfection> local_infections;
 
   Infection(Pathogen blueprint, Organ target, int starting_bracket, float quantity) {
-    local_infections = new LinkedHashMap<Organ, LocalInfection>();
+    local_infections = new HashMap<Organ, LocalInfection>();
     pathogen = blueprint;
     host = target.body;
     infect_organ(target, starting_bracket, quantity);

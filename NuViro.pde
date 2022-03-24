@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 Pop[] pops;
@@ -64,7 +65,7 @@ void keyReleased() {
   }
   if (key==' ') {
     float infection_strength = 0.05;
-    Organ o = selected.organs[round(random(-0.49, organ_type.values().length-0.51))];
+    Organ o = selected.get_random_organ();
     float infection_volume = o.current_volume*infection_strength;
     tester.infect(o, 0, infection_volume);
   }
