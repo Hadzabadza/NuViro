@@ -14,6 +14,8 @@ class Pathogen {
   float[] repro_probs;
   int[] repro_destinations;
   
+  float[][] migration_probs;
+  
   HashMap<organ_type, Float> tropism;
   HashMap<organ_type, Float> trophism;
   
@@ -27,7 +29,8 @@ class Pathogen {
     float [] _life_cycle_probs,
     int[] _repro_brackets,
     float[] _repro_probs,
-    int[] _repro_destinations) 
+    int[] _repro_destinations,
+    float[][] _migration_probs) 
   {
     type = _type;
     name = _name;
@@ -36,6 +39,7 @@ class Pathogen {
     repro_brackets = _repro_brackets;
     repro_probs = _repro_probs;
     repro_destinations = _repro_destinations; 
+    migration_probs = _migration_probs;
     infections = new LinkedHashMap<Pop, Infection>();
   }
 

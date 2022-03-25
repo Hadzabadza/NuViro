@@ -2,21 +2,47 @@ class Infection {
   Pathogen pathogen; 
   Pop host;
   HashMap<Organ, LocalInfection> local_infections;
+  HashMap<Organ, LocalInfection> nufections;
+  float _adjuster;
+  float _transferrer;
 
   Infection(Pathogen blueprint, Organ target, int starting_bracket, float quantity) {
     local_infections = new HashMap<Organ, LocalInfection>();
+    nufections = new HashMap<Organ, LocalInfection>();
     pathogen = blueprint;
     host = target.body;
     infect_organ(target, starting_bracket, quantity);
   }
 
-  void infect_organ(Organ target, int bracket, float quantity) {
-    if (!local_infections.containsKey(target)) local_infections.put(target, new LocalInfection(this, target, bracket, quantity)); 
-    else local_infections.get(target).adjust_pop(bracket, quantity);
+  float infect_organ(Organ target, int bracket, float quantity) {
+    LocalInfection linf;
+    if (!local_infections.containsKey(target)) 
+    {
+      linf = new LocalInfection(this, target);
+      nufections.put(target, linf);
+      _adjuster = linf.adjust_pop(bracket, quantity);
+    } else
+    {
+      linf = local_infections.get(target);
+      _adjuster = linf.adjust_pop(bracket, quantity);
+    }
+    return _adjuster;
+  }
+
+  float transfer_to_organ(LocalInfection from, Organ to, int bracket, float quantity) {
+    _transferrer = from.adjust_pop(bracket, -quantity)*-1;
+    infect_organ(to, bracket, _transferrer);
+    _transferrer-=_adjuster;
+    if (_transferrer>0) from.adjust_pop(bracket, _transferrer);
+    return _adjuster;
   }
 
   void update() {
     for (LocalInfection linf : local_infections.values()) linf.update();
+    if (nufections.size()>0) {
+      local_infections.putAll(nufections);
+      nufections.clear();
+    }
   }
 
   void draw(int x, int y) {
@@ -41,22 +67,29 @@ class LocalInfection {
   Organ host_organ;
   float[] age_brackets;
   float _adjuster;
+  float _transferrer;
   float _agers;
   float _newgens;
+  float organ_migration_sum;
+  float _migrants;
 
-  LocalInfection(Infection parent_infection, Organ _host_organ, int target_bracket, float quantity) {
+  LocalInfection(Infection parent_infection, Organ _host_organ) {
     infection = parent_infection;
     pathogen = infection.pathogen;
     host_organ = _host_organ;
+    organ_migration_sum = 0;
+    for (float f : host_organ.connection_map.values()) organ_migration_sum += f; 
     age_brackets = new float[pathogen.life_cycle_states];
     for (int i=0; i<age_brackets.length; i++) age_brackets[i]=0;
-    adjust_pop(target_bracket, quantity);
   }
 
   void update() {
 
     //Ded    
     adjust_pop(age_brackets.length-1, -age_brackets[age_brackets.length-1]*pathogen.life_cycle_probs[age_brackets.length-1]*random(0.5, 1.5)*debug_mortality_modifier);
+
+    //Migrating
+    migrate();
 
     //Aging
     for (int i = age_brackets.length-1; i>0; i--) {
@@ -72,7 +105,22 @@ class LocalInfection {
     }
   }
 
-  void adjust_pop(int bracket, float quantity) {
-    age_brackets[bracket]+=host_organ.adjust_occupied_volume(quantity);
+  void migrate() {
+    //floor(x+0.5)*pow(2*x-1,2);
+    float active_migration_push_coefficient=pow(host_organ.current_volume/host_organ.max_volume, 2);
+    for (int i=0; i<age_brackets.length; i++) {
+      //Drifters
+      _migrants = age_brackets[i]*pathogen.migration_probs[i][0];
+      //Active migrants
+      _migrants += age_brackets[i]*pathogen.migration_probs[i][1]*active_migration_push_coefficient;
+      for (Organ o : host_organ.connection_map.keySet()) 
+        infection.transfer_to_organ(this, o, i, _migrants*host_organ.connection_map.get(o));
+    }
+  }
+
+  float adjust_pop(int target_bracket, float quantity) {
+    _adjuster = host_organ.adjust_occupied_volume(quantity);
+    age_brackets[target_bracket]+=_adjuster;
+    return _adjuster;
   }
 }

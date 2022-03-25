@@ -18,7 +18,8 @@ void setup() {
   int[] tester_repro_brackets = {2, 3};
   float[] tester_repro_probs = {0.005, 0.002};
   int[] tester_repro_destinations = {0, 0};
-  tester = new Pathogen(3, "Tester", 4, tester_life_cycle_probs, tester_repro_brackets, tester_repro_probs, tester_repro_destinations);
+  float[][] tester_migration_coeffs={{0.05,0.00},{0.02,0.05},{0.01,0.08},{0.02,0.04}};
+  tester = new Pathogen(3, "Tester", 4, tester_life_cycle_probs, tester_repro_brackets, tester_repro_probs, tester_repro_destinations, tester_migration_coeffs);
 }
 
 void draw() {
