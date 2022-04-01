@@ -7,7 +7,6 @@ Pathogen tester;
 float delta_time=0;
 float last_frame_time=0;
 float update_timer_second=0;
-float update_period = 20;
 float debug_mortality_modifier=1;
 
 void setup() {
@@ -19,7 +18,14 @@ void setup() {
   float[] tester_repro_probs = {0.005, 0.002};
   int[] tester_repro_destinations = {0, 0};
   float[][] tester_migration_coeffs={{0.05,0.00},{0.02,0.05},{0.01,0.08},{0.02,0.04}};
-  tester = new Pathogen(3, "Tester", 4, tester_life_cycle_probs, tester_repro_brackets, tester_repro_probs, tester_repro_destinations, tester_migration_coeffs);
+  HashMap <organ_type, Float> tropism = new HashMap <organ_type, Float>();
+  tropism.put(organ_type.HEART, 1.0);
+  tester = new Pathogen(3, "Tester", 4, tester_life_cycle_probs, tester_repro_brackets, tester_repro_probs, tester_repro_destinations, tester_migration_coeffs, tropism);
+}
+
+void tick(){
+  for (Pop p : pops) p.update();
+  tester.process_infections();
 }
 
 void draw() {
@@ -28,7 +34,7 @@ void draw() {
   last_frame_time = millis();
   update_timer_second+=delta_time;
 
-  if (update_timer_second>update_period) tester.process_infections();
+  if (update_timer_second>update_period) tick();
 
   selected = get_pop_near_mouse(mouseX, mouseY);
   selected.draw_selected();
@@ -70,4 +76,8 @@ void keyReleased() {
     float infection_volume = o.current_volume*infection_strength;
     tester.infect(o, 0, infection_volume);
   }
+}
+
+float log2 (float x) {
+  return log(x) / log(2);
 }

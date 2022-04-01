@@ -40,10 +40,10 @@ class Pop {
   
   void update() {
     wander();
+    for (Organ o: organs.values()) o.update();
   }
 
   void draw() {
-    update(); 
     fill(c);
     ellipse(pos.x, pos.y, scale.x, scale.y);
   }
