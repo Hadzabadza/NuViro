@@ -13,11 +13,11 @@ void setup() {
   size (1000, 1000);
   pops = new Pop[100];
   for (int i=0; i<pops.length; i++) pops[i] = new Pop(i);
-  float[] tester_life_cycle_probs = {0.007, 0.006, 0.004, 0.007};
+  float[] tester_life_cycle_probs = {0.01, 0.006, 0.004, 0.007};
   int[] tester_repro_brackets = {2, 3};
   float[] tester_repro_probs = {0.005, 0.002};
   int[] tester_repro_destinations = {0, 0};
-  float[][] tester_migration_coeffs={{0.05,0.00},{0.02,0.05},{0.01,0.08},{0.02,0.04}};
+  float[][] tester_migration_coeffs={{0.01,0.00},{0.008,0.05},{0.005,0.08},{0.005,0.04}};
   HashMap <organ_type, Float> tropism = new HashMap <organ_type, Float>();
   tropism.put(organ_type.HEART, 1.0);
   tester = new Pathogen(3, "Tester", 4, tester_life_cycle_probs, tester_repro_brackets, tester_repro_probs, tester_repro_destinations, tester_migration_coeffs, tropism);

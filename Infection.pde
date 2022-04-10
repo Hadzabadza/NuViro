@@ -44,13 +44,41 @@ class Infection {
       nufections.clear();
     }
   }
+  
+  Organ[] merge_sort_organs_by_ratio(Organ[] current_split){
+    if (current_split.length>1) {
+      Organ [] left_side = new Organ[current_split.length/2];
+      for (int i = 0; i<left_side.length; i++) left_side[i] = current_split[i];
+      Organ [] right_side = new Organ[current_split.length-left_side.length];
+      for (int i = 0; i<right_side.length; i++) right_side[i] = current_split[i+left_side.length];
+      left_side = merge_sort_organs_by_ratio(left_side);
+      right_side = merge_sort_organs_by_ratio(right_side);
+      int left_index = 0;
+      int right_index = 0;
+      for (int i = 0; i<left_side.length+right_side.length; i++) {
+        if ((right_index>=right_side.length)
+          ||(left_index<left_side.length)
+          &&(left_side[left_index].volume_ratio<right_side[right_index].volume_ratio)) 
+        {
+          current_split[i] = left_side[left_index];
+          left_index++;
+        } else {
+          current_split[i] = right_side[right_index];
+          right_index++;
+        }
+      }
+    }
+    return current_split;
+  }
 
   void draw(int x, int y) {
     if (selected == host) {
       String infection_stats;
       float[] pool;
       int offset = 0;
-      for (Organ o : local_infections.keySet()) {
+      Organ[] os = local_infections.keySet().toArray(new Organ[local_infections.size()]);
+      os = merge_sort_organs_by_ratio(os);
+      for (Organ o : os) {
         infection_stats = ""+o.name+": "+String.format("%.0f", 100*o.volume_ratio)+"%";
         pool = local_infections.get(o).age_brackets;
         for (int i=0; i<pool.length; i++) infection_stats+=" "+String.format("%.2f", pool[i]);
@@ -79,6 +107,7 @@ class LocalInfection {
   float _migrants;
   float _random_distrib;
   float _tropism_adjustment;
+  float _active_migration_push_coefficient;
 
   LocalInfection(Infection parent_infection, Organ _host_organ) {
     infection = parent_infection;
@@ -91,13 +120,14 @@ class LocalInfection {
     tropism_sq = pow(tropism, 2);
 
     _organ_migration_sum = 0;
-    for (float f : host_organ.connection_map.values()) _organ_migration_sum += f;
+    //for (float f : host_organ.connection_map.values()) _organ_migration_sum += f;
+    for (Organ o : host_organ.connection_map.keySet()) 
+      _organ_migration_sum += host_organ.connection_map.get(o)*pathogen.tropism.get(o.type);
   }
 
   void update() {
 
     _random_distrib = random(0.5, 1.5);
-    //_tropism_adjustment = 1-max(1-pow((1/tropism)*host_organ.volume_ratio, 3), 0);
     _tropism_adjustment = max(1-(host_organ.volume_parabolic_ratio_component/tropism_sq), 0);
 
     //Ded    
@@ -107,7 +137,14 @@ class LocalInfection {
     migrate();
 
     //Aging
-    for (int i = age_brackets.length-1; i>0; i--) {
+    
+    // //Eggs hatching
+    _agers = age_brackets[0]*(pathogen.life_cycle_probs[0]*_random_distrib*debug_mortality_modifier*max(0.1,_tropism_adjustment));
+    adjust_pop(0, -_agers);
+    adjust_pop(1, _agers);
+    
+    // //Actual aging
+    for (int i = age_brackets.length-1; i>1; i--) {
       _agers = age_brackets[i-1]*(pathogen.life_cycle_probs[i-1]*_random_distrib*debug_mortality_modifier);
       adjust_pop(i-1, -_agers);
       adjust_pop(i, _agers);
@@ -124,14 +161,14 @@ class LocalInfection {
   void migrate() {
     //floor(x+0.5)*pow(2*x-1,2);
     //float active_migration_push_coefficient=pow(host_organ.current_volume/host_organ.max_volume, 2);
-    float active_migration_push_coefficient=1-_tropism_adjustment;
+    _active_migration_push_coefficient=1-_tropism_adjustment;
     for (int i=0; i<age_brackets.length; i++) {
       //Drifters
       _migrants = age_brackets[i]*pathogen.migration_probs[i][0];
       //Active migrants
-      _migrants += age_brackets[i]*pathogen.migration_probs[i][1]*active_migration_push_coefficient;
+      _migrants += age_brackets[i]*pathogen.migration_probs[i][1]*_active_migration_push_coefficient;
       for (Organ o : host_organ.connection_map.keySet()) 
-        infection.transfer_to_organ(this, o, i, _migrants*host_organ.connection_map.get(o));
+        infection.transfer_to_organ(this, o, i, _migrants*host_organ.connection_map.get(o)*pathogen.tropism.get(o.type));
     }
   }
 

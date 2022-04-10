@@ -8,7 +8,10 @@ class Pop {
 
   Pop(int _id) {
     id = _id;
-    pos = new PVector (random(0, width), random(0, height));
+    //pos = new PVector (random(0, width), random(0, height));
+    pos = new PVector (
+      width*0.2+(ceil(_id%sqrt(pops.length))/sqrt(pops.length))*(width*0.5), 
+      height*0.1+(floor((_id/sqrt(pops.length)))/sqrt(pops.length))*(height*0.8));
     scale = new PVector (10, 10);
     init_organs();
     infections = new LinkedHashMap<Pathogen, Infection>();
@@ -18,7 +21,7 @@ class Pop {
   private void init_organs() {
     organs = new HashMap <organ_type, Organ>();
     for (int i = 0; i<organ_type.values().length; i++) organs.put(organ_type.values()[i], new Organ(organ_type.values()[i], this));
-    for (Organ o:organs.values()) o.connect_organs(organs);
+    for (Organ o : organs.values()) o.connect_organs(organs);
   }
 
   Infection infect_with_pathogen(Pathogen blueprint, Organ target, int target_bracket, float quantity) {
@@ -27,20 +30,20 @@ class Pop {
     else infections.get(blueprint).infect_organ(target, target_bracket, quantity);
     return infections.get(blueprint);
   }
-  
-  Organ get_random_organ(){
+
+  Organ get_random_organ() {
     int target=round(random(-0.49, organs.size()-0.51));
     int i=0;
-    for (Organ o:organs.values()) {
+    for (Organ o : organs.values()) {
       if (i==target) return o;
       else i++;
     }
     return null;
   }
-  
+
   void update() {
-    wander();
-    for (Organ o: organs.values()) o.update();
+    //wander();
+    for (Organ o : organs.values()) o.update();
   }
 
   void draw() {
@@ -53,7 +56,8 @@ class Pop {
     noFill(); 
     ellipse(pos.x, pos.y, scale.x*2, scale.y*2);
     fill(255);
-    for (Infection inf : infections.values()) inf.draw(round(pos.x)+10, round(pos.y));
+    //for (Infection inf : infections.values()) inf.draw(round(pos.x)+10, round(pos.y));
+    for (Infection inf : infections.values()) inf.draw(round(width*0.7), 30);
   }
 
   void wander() {
